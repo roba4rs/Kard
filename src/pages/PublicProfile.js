@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -84,11 +84,7 @@ export default function PublicProfile() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
-  useEffect(() => {
-    fetchProfile()
-  }, [slug])
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     const { data: profileData } = await supabase
       .from('profiles')
       .select('*')
@@ -112,7 +108,11 @@ export default function PublicProfile() {
 
     if (linksData) setLinks(linksData)
     setLoading(false)
-  }
+  }, [slug])
+
+  useEffect(() => {
+    fetchProfile()
+  }, [fetchProfile])
 
   const downloadVCard = () => {
     const vcard = [

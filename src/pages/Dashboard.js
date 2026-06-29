@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -125,11 +125,7 @@ export default function Dashboard() {
   const [message, setMessage] = useState(null)
   const [linksMessage, setLinksMessage] = useState(null)
 
-  useEffect(() => {
-    if (user) fetchProfile()
-  }, [user])
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     const { data } = await supabase
       .from('profiles')
       .select('*')
@@ -151,7 +147,11 @@ export default function Dashboard() {
 
     if (linksData) setLinks(linksData)
     setLoading(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) fetchProfile()
+  }, [user, fetchProfile])
 
   const saveProfile = async () => {
     setSaving(true)
