@@ -122,7 +122,15 @@ export default function PrintCardModal({ isOpen, onClose, profile, publicUrl }) 
     if (!previewRef.current) return
     setDownloading(true)
     try {
-      const canvas = await html2canvas(previewRef.current, { scale: 4, backgroundColor: null })
+      const canvas = await html2canvas(previewRef.current, {
+        scale: 6,
+        backgroundColor: null,
+        width: CARD_W,
+        height: CARD_H,
+        windowWidth: CARD_W,
+        windowHeight: CARD_H,
+        useCORS: true,
+      })
       const a = document.createElement('a')
       a.download = `kard-card-${selectedColorId}.png`
       a.href = canvas.toDataURL('image/png')
