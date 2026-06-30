@@ -20,7 +20,7 @@ const PLATFORM_LABELS = {
   other: 'Other',
 }
 
-// Brand background per platform (used behind the icon glyph)
+// Brand background perr platform (used behind the icon glyph)
 const PLATFORM_BG = {
   linkedin: '#0A66C2',
   github: '#24292F',
