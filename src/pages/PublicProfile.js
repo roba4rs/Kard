@@ -49,24 +49,34 @@ const IconMail = () => (
 const IconSave = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zM12 19a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM15 9H6V5h9v4z"/></svg>
 )
-const IconChevron = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+const IconPin = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+)
+const IconArrowUpRight = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
 )
 
 // ── Link tile styling: icon, bg, text color, label ─────────
 const PLATFORM_META = {
-  linkedin:  { Icon: IconLinkedIn,  bg: '#e8f0fe', color: '#0a66c2', label: 'LinkedIn' },
-  github:    { Icon: IconGitHub,    bg: '#1c1c1c', color: '#ffffff', label: 'GitHub' },
-  instagram: { Icon: IconInstagram, bg: '#fde8f3', color: '#c13584', label: 'Instagram' },
-  facebook:  { Icon: IconFacebook,  bg: '#e7f0fe', color: '#1877f2', label: 'Facebook' },
-  tiktok:    { Icon: IconTikTok,    bg: '#000000', color: '#ffffff', label: 'TikTok' },
-  threads:   { Icon: IconThreads,   bg: '#1c1c1c', color: '#ffffff', label: 'Threads' },
-  telegram:  { Icon: IconTelegram,  bg: '#e6f4ff', color: '#229ed9', label: 'Telegram' },
-  website:   { Icon: IconWebsite,   bg: '#dcfce7', color: '#16a34a', label: 'Website' },
-  other:     { Icon: IconLink,      bg: '#1c1c1c', color: '#ffffff', label: null },
+  linkedin:  { Icon: IconLinkedIn,  bg: '#16243d', color: '#3b9eff', label: 'LinkedIn' },
+  github:    { Icon: IconGitHub,    bg: '#1e1e1e', color: '#e5e5e5', label: 'GitHub' },
+  instagram: { Icon: IconInstagram, bg: '#3a1530', color: '#f472b6', label: 'Instagram' },
+  facebook:  { Icon: IconFacebook,  bg: '#13233f', color: '#3b82f6', label: 'Facebook' },
+  tiktok:    { Icon: IconTikTok,    bg: '#161616', color: '#ffffff', label: 'TikTok' },
+  threads:   { Icon: IconThreads,   bg: '#1e1e1e', color: '#e5e5e5', label: 'Threads' },
+  telegram:  { Icon: IconTelegram,  bg: '#11293a', color: '#38bdf8', label: 'Telegram' },
+  website:   { Icon: IconWebsite,   bg: '#15301f', color: '#22c55e', label: 'Website' },
+  other:     { Icon: IconLink,      bg: '#1e1e1e', color: '#e5e5e5', label: null },
 }
 
-const RESUME_META = { Icon: IconDoc, bg: '#163224', color: '#22c55e', label: 'Resume' }
+const RESUME_META = { Icon: IconDoc, bg: '#15301f', color: '#22c55e', label: 'Resume' }
+
+// Strip a URL down to a clean handle/domain for the card subtitle,
+// e.g. "https://github.com/rgidey/" -> "github.com/rgidey"
+const displayUrl = (url) => {
+  if (!url) return ''
+  return url.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '')
+}
 
 // ── Design tokens (matches Dashboard.js) ───────────────────
 const C = {
@@ -168,22 +178,97 @@ const S = {
     textDecoration: 'none',
     boxSizing: 'border-box',
   },
-  linkRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    padding: '14px 2px',
-    textDecoration: 'none',
-    borderBottom: `1px solid ${C.divider}`,
-  },
-  iconTile: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
+  btnIconOnly: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 15,
+    width: 48,
+    height: 48,
+    flexShrink: 0,
+    background: '#141414',
+    color: C.textSecond,
+    border: `1px solid ${C.inputBorder}`,
+    borderRadius: 12,
+    cursor: 'pointer',
+    boxSizing: 'border-box',
+  },
+  eyebrow: {
+    margin: '0 0 10px',
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: '0.14em',
+    textTransform: 'uppercase',
+    color: C.textMuted,
+  },
+  avatarWrap: {
+    position: 'relative',
+    width: 92,
+    height: 92,
+    margin: '0 auto 18px',
+  },
+  avatarImg: {
+    position: 'relative',
+    zIndex: 1,
+    width: 92,
+    height: 92,
+    borderRadius: 14,
+    objectFit: 'cover',
+    display: 'block',
+  },
+  avatarInitials: {
+    position: 'relative',
+    zIndex: 1,
+    width: 92,
+    height: 92,
+    borderRadius: 14,
+    background: C.accentSoft,
+    color: C.accent,
+    fontSize: 28,
+    fontWeight: 700,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    letterSpacing: '-0.5px',
+  },
+  locationRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    margin: '0 0 18px',
+    fontSize: 13,
+    color: C.textSecond,
+  },
+  linksHeaderRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    margin: '0 0 10px 2px',
+  },
+  linksCount: {
+    fontSize: 12,
+    color: C.textMuted,
+  },
+  linkCard: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    padding: '13px 14px',
+    marginBottom: 10,
+    background: '#161616',
+    border: `1px solid ${C.cardBorder}`,
+    borderRadius: 16,
+    textDecoration: 'none',
+    boxSizing: 'border-box',
+  },
+  iconTile: {
+    width: 40,
+    height: 40,
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 16,
     flexShrink: 0,
   },
 }
@@ -344,135 +429,106 @@ export default function PublicProfile() {
 
             {/* Identity */}
             <div style={{ textAlign: 'center', marginBottom: 4 }}>
-              {profile.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={profile.display_name}
-                  style={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    marginBottom: 16,
-                    border: `1.5px solid ${C.accent}`,
-                  }}
-                />
-              ) : (
-                <div style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  background: C.accentSoft,
-                  color: C.accent,
-                  fontSize: 24,
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  letterSpacing: '-0.5px',
-                  margin: '0 auto 16px',
-                  border: `1.5px solid ${C.accent}`,
-                }}>
-                  {getInitials(profile.display_name)}
-                </div>
-              )}
-              <h1 style={{ margin: '0 0 4px', fontSize: 21, fontWeight: 700, color: C.textPrimary, letterSpacing: '-0.2px' }}>
+              <p style={S.eyebrow}>Public Profile</p>
+
+              <div style={S.avatarWrap}>
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} alt={profile.display_name} style={S.avatarImg} />
+                ) : (
+                  <div style={S.avatarInitials}>{getInitials(profile.display_name)}</div>
+                )}
+              </div>
+
+              <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: C.textPrimary, letterSpacing: '-0.2px' }}>
                 {profile.display_name}
               </h1>
               {(profile.title || profile.company) && (
-                <p style={{ margin: '0 0 12px', fontSize: 14, color: C.textSecond }}>
+                <p style={{ margin: '0 0 10px', fontSize: 14, color: C.textSecond }}>
                   {profile.title}
                   {profile.title && profile.company ? ' · ' : ''}
                   {profile.company}
                 </p>
               )}
-              {profile.slug && (
-                <span style={{
-                  display: 'inline-block',
-                  background: C.accentSoft,
-                  color: C.accent,
-                  fontSize: 12,
-                  fontWeight: 500,
-                  padding: '4px 12px',
-                  borderRadius: 20,
-                }}>
-                  card.app/r/{profile.slug}
-                </span>
+              {profile.location && (
+                <div style={S.locationRow}>
+                  <IconPin />
+                  <span>{profile.location}</span>
+                </div>
               )}
             </div>
 
             <div style={S.divider} />
 
-            {/* Call + Email, side by side */}
-            {(profile.phone || profile.email) && (
-              <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-                {profile.phone && (
-                  <a href={'tel:' + profile.phone} onClick={logCall} style={{ ...S.btnPrimary, flex: 1 }}>
-                    <IconPhone /> Call
-                  </a>
-                )}
-                {profile.email && (
-                  <a href={'mailto:' + profile.email} style={{ ...S.btnOutline, flex: 1 }}>
-                    <IconMail /> Email
-                  </a>
-                )}
-              </div>
-            )}
-
-            {/* Save contact */}
-            <button onClick={downloadVCard} style={{ ...S.btnGhost, marginBottom: hasLinks ? 8 : 0 }}>
-              <IconSave /> Save contact
-            </button>
+            {/* Call + Email + Save, in one row */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: hasLinks ? 18 : 0 }}>
+              {profile.phone && (
+                <a href={'tel:' + profile.phone} onClick={logCall} style={{ ...S.btnPrimary, flex: 1.4 }}>
+                  <IconPhone /> Call
+                </a>
+              )}
+              {profile.email && (
+                <a href={'mailto:' + profile.email} style={{ ...S.btnOutline, flex: 1.4 }}>
+                  <IconMail /> Email
+                </a>
+              )}
+              <button onClick={downloadVCard} style={S.btnIconOnly} aria-label="Save contact" title="Save contact">
+                <IconSave />
+              </button>
+            </div>
 
             {/* Links (resume folded in) */}
             {hasLinks && (
-              <div style={{ marginTop: 18 }}>
-                <p style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  color: C.textMuted,
-                  textTransform: 'uppercase',
-                  margin: '0 0 4px 2px',
-                }}>
-                  Links
-                </p>
+              <div>
+                <div style={S.linksHeaderRow}>
+                  <p style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: '0.08em',
+                    color: C.textMuted,
+                    textTransform: 'uppercase',
+                    margin: 0,
+                  }}>
+                    Socials &amp; Links
+                  </p>
+                  <span style={S.linksCount}>
+                    {links.length + (profile.resume_url ? 1 : 0)} total
+                  </span>
+                </div>
 
                 {profile.resume_url && (
-                  <a
-                    href={profile.resume_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={S.linkRow}
-                  >
+                  <a href={profile.resume_url} target="_blank" rel="noreferrer" style={S.linkCard}>
                     <span style={{ ...S.iconTile, background: RESUME_META.bg, color: RESUME_META.color }}>
                       <RESUME_META.Icon />
                     </span>
-                    <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: C.textPrimary }}>
-                      {RESUME_META.label}
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ display: 'block', fontSize: 14, fontWeight: 600, color: C.textPrimary }}>
+                        {RESUME_META.label}
+                      </span>
+                      <span style={{ display: 'block', fontSize: 12.5, color: C.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        View document
+                      </span>
                     </span>
-                    <span style={{ color: C.textMuted }}><IconChevron /></span>
+                    <span style={{ color: C.textMuted, flexShrink: 0 }}><IconArrowUpRight /></span>
                   </a>
                 )}
 
-                {links.map(function(link, i) {
+                {links.map(function(link) {
                   const meta = PLATFORM_META[link.platform] || PLATFORM_META.other
-                  const isLast = i === links.length - 1
+                  const title = link.platform === 'other' ? (link.label || 'Link') : meta.label
                   return (
-                    <a
-                      key={link.id}
-                      href={link.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={isLast ? { ...S.linkRow, borderBottom: 'none' } : S.linkRow}
-                    >
+                    <a key={link.id} href={link.url} target="_blank" rel="noreferrer" style={S.linkCard}>
                       <span style={{ ...S.iconTile, background: meta.bg, color: meta.color }}>
                         <meta.Icon />
                       </span>
-                      <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: C.textPrimary }}>
-                        {link.platform === 'other' ? link.label : meta.label}
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ display: 'block', fontSize: 14, fontWeight: 600, color: C.textPrimary }}>
+                          {title}
+                        </span>
+                        <span style={{ display: 'block', fontSize: 12.5, color: C.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {displayUrl(link.url)}
+                        </span>
                       </span>
-                      <span style={{ color: C.textMuted }}><IconChevron /></span>
+                      <span style={{ color: C.textMuted, flexShrink: 0 }}><IconArrowUpRight /></span>
                     </a>
                   )
                 })}
@@ -485,10 +541,12 @@ export default function PublicProfile() {
             <p style={{
               textAlign: 'center',
               margin: 0,
-              fontSize: 12,
+              fontSize: 11,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
               color: C.textMuted,
             }}>
-              Powered by <span style={{ color: C.accent, fontWeight: 600 }}>card.</span>
+              Powered by <span style={{ color: C.accent, fontWeight: 700 }}>card.</span>
             </p>
 
           </div>
