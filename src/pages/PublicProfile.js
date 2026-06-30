@@ -285,6 +285,14 @@ export default function PublicProfile() {
   const [links, setLinks] = useState([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkSize = () => setIsMobile(window.innerWidth <= 380)
+    checkSize()
+    window.addEventListener('resize', checkSize)
+    return () => window.removeEventListener('resize', checkSize)
+  }, [])
 
   const logView = async (profileId) => {
     try {
@@ -435,7 +443,14 @@ export default function PublicProfile() {
 
             {/* Identity */}
             <p style={S.eyebrow}>Public Profile</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 4 }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              flexDirection: isMobile ? 'column' : 'row',
+              textAlign: isMobile ? 'center' : 'left',
+              gap: 16,
+              marginBottom: 4,
+            }}>
               <div style={S.avatarWrap}>
                 {profile.avatar_url ? (
                   <img src={profile.avatar_url} alt={profile.display_name} style={S.avatarImg} />
@@ -444,7 +459,7 @@ export default function PublicProfile() {
                 )}
               </div>
 
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ flex: 1, minWidth: 0, width: isMobile ? '100%' : 'auto' }}>
                 <h1 style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 700, color: C.textPrimary, letterSpacing: '-0.2px' }}>
                   {profile.display_name}
                 </h1>
@@ -456,7 +471,7 @@ export default function PublicProfile() {
                   </p>
                 )}
                 {profile.location && (
-                  <div style={S.locationRow}>
+                  <div style={{ ...S.locationRow, justifyContent: isMobile ? 'center' : 'flex-start' }}>
                     <IconPin />
                     <span>{profile.location}</span>
                   </div>
