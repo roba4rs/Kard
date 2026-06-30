@@ -266,11 +266,15 @@ export default function PublicProfile() {
 
     const blob = new Blob([vcard], { type: 'text/vcard' })
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = profile.display_name + '.vcf'
-    a.click()
-    URL.revokeObjectURL(url)
+
+    // No "download" attribute here on purpose: setting one forces the phone
+    // to treat this as a generic file and drop it in Downloads/Files. Without
+    // it, iOS Safari and Android Chrome recognize the vcard mime type and
+    // open the native "New Contact" screen instead, prefilled and ready
+    // for the user to tap Save — there's no JS API to skip that tap, this
+    // is the closest the web platform gets to a native "Save contact" flow.
+    window.location.href = url
+    setTimeout(function() { URL.revokeObjectURL(url) }, 4000)
     logSave()
   }
 
