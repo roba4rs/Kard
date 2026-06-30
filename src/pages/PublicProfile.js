@@ -264,17 +264,16 @@ export default function PublicProfile() {
       'END:VCARD'
     ].filter(Boolean).join('\n')
 
-    const blob = new Blob([vcard], { type: 'text/vcard' })
-    const url = URL.createObjectURL(blob)
-
-    // No "download" attribute here on purpose: setting one forces the phone
-    // to treat this as a generic file and drop it in Downloads/Files. Without
-    // it, iOS Safari and Android Chrome recognize the vcard mime type and
-    // open the native "New Contact" screen instead, prefilled and ready
-    // for the user to tap Save — there's no JS API to skip that tap, this
-    // is the closest the web platform gets to a native "Save contact" flow.
-    window.location.href = url
-    setTimeout(function() { URL.revokeObjectURL(url) }, 4000)
+    // Using a data: URI instead of a blob: URI here. Blob URLs have no file
+    // extension (e.g. blob:https://site.com/uuid), and some mobile browsers
+    // won't recognize them as vCard content without one, so they just
+    // download the file instead of opening the native "Add Contact" screen.
+    // A base64 data URI with an explicit vcard mime type is recognized more
+    // consistently by iOS Safari and Android Chrome for that native flow.
+    // Desktop browsers will still just download it either way — there's no
+    // contacts app to hand it off to there, which is expected.
+    const dataUri = 'data:text/vcard;charset=utf-8;base64,' + btoa(unescape(encodeURIComponent(vcard)))
+    window.location.href = dataUri
     logSave()
   }
 
