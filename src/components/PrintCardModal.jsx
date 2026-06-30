@@ -26,16 +26,24 @@ const COLORS = [
   { id: 'orange', hex: '#f97316', swatch: '#f97316', name: 'Orange' },
 ]
 
-// ── The single base card layout ──────────────────────────────
-// Dark contact card: name + vertical accent bar top-left, contact
-// rows with icons below, QR top-right, small brand tag bottom-right.
-function CardTemplate({ profile, publicUrl, accentHex, qrId }) {
-  const rows = [
+// ── Shared contact-row extraction, used by every layout ─────
+function getContactRows(profile) {
+  return [
     profile.email && { icon: '✉', text: profile.email },
     profile.phone && { icon: '📞', text: profile.phone },
     profile.slug && { icon: '🔗', text: `kard.app/r/${profile.slug}` },
   ].filter(Boolean)
+}
 
+function getInitials(profile) {
+  const name = profile.display_name || '?'
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+}
+
+// ── Layout 1: Classic ─────────────────────────────────────────
+// Vertical accent bar top-left, contact rows below, QR top-right.
+function LayoutClassic({ profile, publicUrl, accentHex, qrId }) {
+  const rows = getContactRows(profile)
   return (
     <div style={{
       width: CARD_W, height: CARD_H, borderRadius: 14,
@@ -44,21 +52,16 @@ function CardTemplate({ profile, publicUrl, accentHex, qrId }) {
       padding: '20px 20px 20px 26px',
       fontFamily: 'system-ui, -apple-system, sans-serif',
     }}>
-      {/* Vertical accent bar */}
       <div style={{
         position: 'absolute', left: 0, top: 18, bottom: 18, width: 4,
         borderRadius: 4, background: accentHex,
       }} />
-
-      {/* Name + title */}
       <p style={{ margin: 0, fontSize: 19, fontWeight: 700, color: '#fff', letterSpacing: '-0.3px' }}>
         {profile.display_name || 'Your name'}
       </p>
       <p style={{ margin: '3px 0 14px', fontSize: 11, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: accentHex }}>
         {profile.title || 'Title'}{profile.company ? ` · ${profile.company}` : ''}
       </p>
-
-      {/* Contact rows */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {rows.map((r, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
@@ -67,16 +70,12 @@ function CardTemplate({ profile, publicUrl, accentHex, qrId }) {
           </div>
         ))}
       </div>
-
-      {/* QR code, top-right */}
       <div style={{
         position: 'absolute', top: 16, right: 16, background: '#fff',
         borderRadius: 8, padding: 6, display: 'flex',
       }}>
         <QRCodeSVG id={qrId} value={publicUrl} size={62} />
       </div>
-
-      {/* Brand tag, bottom-right */}
       <div style={{ position: 'absolute', bottom: 16, right: 18, display: 'flex', alignItems: 'center', gap: 5 }}>
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: accentHex }} />
         <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>kard<span style={{ color: accentHex }}>.</span></span>
@@ -85,8 +84,182 @@ function CardTemplate({ profile, publicUrl, accentHex, qrId }) {
   )
 }
 
+// ── Layout 2: Centered ───────────────────────────────────────
+// Everything center-aligned, QR sits below the name/title block.
+function LayoutCentered({ profile, publicUrl, accentHex, qrId }) {
+  const rows = getContactRows(profile)
+  return (
+    <div style={{
+      width: CARD_W, height: CARD_H, borderRadius: 14,
+      background: '#0d0d0d', position: 'relative', boxSizing: 'border-box',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      textAlign: 'center', padding: '16px 20px',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+    }}>
+      <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#fff' }}>
+        {profile.display_name || 'Your name'}
+      </p>
+      <p style={{ margin: '3px 0 10px', fontSize: 10.5, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: accentHex }}>
+        {profile.title || 'Title'}{profile.company ? ` · ${profile.company}` : ''}
+      </p>
+      <div style={{ width: 30, height: 2, borderRadius: 2, background: accentHex, marginBottom: 10 }} />
+      <div style={{ background: '#fff', borderRadius: 8, padding: 5, display: 'inline-flex', marginBottom: 8 }}>
+        <QRCodeSVG id={qrId} value={publicUrl} size={46} />
+      </div>
+      {rows[0] && <p style={{ margin: 0, fontSize: 9.5, color: '#999' }}>{rows[0].text}</p>}
+      <div style={{ position: 'absolute', bottom: 10, right: 14 }}>
+        <span style={{ fontSize: 9, fontWeight: 700, color: '#666' }}>kard<span style={{ color: accentHex }}>.</span></span>
+      </div>
+    </div>
+  )
+}
+
+// ── Layout 3: Split ──────────────────────────────────────────
+// Solid accent panel with initials on the left, info on dark right side.
+function LayoutSplit({ profile, publicUrl, accentHex, qrId }) {
+  const rows = getContactRows(profile)
+  return (
+    <div style={{
+      width: CARD_W, height: CARD_H, borderRadius: 14,
+      display: 'flex', overflow: 'hidden', boxSizing: 'border-box',
+      background: '#111111', fontFamily: 'system-ui, -apple-system, sans-serif',
+    }}>
+      <div style={{
+        width: 110, flexShrink: 0, background: accentHex,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <span style={{ fontSize: 34, fontWeight: 800, color: '#000' }}>{getInitials(profile)}</span>
+      </div>
+      <div style={{ flex: 1, position: 'relative', padding: '18px 16px', minWidth: 0 }}>
+        <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#fff' }}>
+          {profile.display_name || 'Your name'}
+        </p>
+        <p style={{ margin: '3px 0 12px', fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: accentHex }}>
+          {profile.title || 'Title'}{profile.company ? ` · ${profile.company}` : ''}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          {rows.map((r, i) => (
+            <span key={i} style={{ fontSize: 9.5, color: '#999' }}>{r.text}</span>
+          ))}
+        </div>
+        <div style={{ position: 'absolute', bottom: 14, right: 14, background: '#fff', borderRadius: 6, padding: 4, display: 'flex' }}>
+          <QRCodeSVG id={qrId} value={publicUrl} size={40} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Layout 4: Minimal ────────────────────────────────────────
+// Black background, thin accent underline, small mono contact rows.
+function LayoutMinimal({ profile, publicUrl, accentHex, qrId }) {
+  const rows = getContactRows(profile)
+  return (
+    <div style={{
+      width: CARD_W, height: CARD_H, borderRadius: 14,
+      background: '#000000', border: `1px solid ${C.inputBorder}`,
+      position: 'relative', boxSizing: 'border-box',
+      padding: '20px 22px', fontFamily: 'system-ui, -apple-system, sans-serif',
+    }}>
+      <span style={{ position: 'absolute', top: 16, right: 18, fontSize: 9, fontWeight: 700, color: '#555' }}>
+        kard<span style={{ color: accentHex }}>.</span>
+      </span>
+      <p style={{ margin: '40px 0 0', fontSize: 21, fontWeight: 700, color: '#fff', letterSpacing: '-0.3px' }}>
+        {profile.display_name || 'Your name'}
+      </p>
+      <div style={{ width: 22, height: 2, background: accentHex, margin: '8px 0 10px', borderRadius: 2 }} />
+      <p style={{ margin: 0, fontSize: 10, color: '#888' }}>
+        {profile.title || 'Title'}{profile.company ? ` · ${profile.company}` : ''}
+      </p>
+      <div style={{ position: 'absolute', bottom: 16, left: 22, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {rows.slice(0, 2).map((r, i) => (
+          <span key={i} style={{ fontSize: 9, color: '#666', fontFamily: 'monospace' }}>{r.text}</span>
+        ))}
+      </div>
+      <div style={{ position: 'absolute', bottom: 14, right: 16, background: '#fff', borderRadius: 6, padding: 4, display: 'flex' }}>
+        <QRCodeSVG id={qrId} value={publicUrl} size={34} />
+      </div>
+    </div>
+  )
+}
+
+// ── Layout 5: Bold ───────────────────────────────────────────
+// Full-bleed accent-color background, oversized name, QR small top-left.
+function LayoutBold({ profile, publicUrl, accentHex, qrId }) {
+  const rows = getContactRows(profile)
+  return (
+    <div style={{
+      width: CARD_W, height: CARD_H, borderRadius: 14,
+      background: accentHex, position: 'relative', overflow: 'hidden',
+      boxSizing: 'border-box', padding: '18px 20px',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+    }}>
+      <div style={{
+        position: 'absolute', top: -40, right: -40, width: 140, height: 140,
+        borderRadius: '50%', background: 'rgba(0,0,0,0.12)',
+      }} />
+      <div style={{ position: 'relative', zIndex: 1, background: '#fff', display: 'inline-flex', borderRadius: 6, padding: 4, marginBottom: 12 }}>
+        <QRCodeSVG id={qrId} value={publicUrl} size={36} />
+      </div>
+      <p style={{ position: 'relative', zIndex: 1, margin: 0, fontSize: 24, fontWeight: 800, color: '#000', lineHeight: 1.05 }}>
+        {profile.display_name || 'Your name'}
+      </p>
+      <p style={{ position: 'relative', zIndex: 1, margin: '4px 0 0', fontSize: 11, fontWeight: 600, color: 'rgba(0,0,0,0.65)' }}>
+        {profile.title || 'Title'}{profile.company ? ` · ${profile.company}` : ''}
+      </p>
+      <div style={{ position: 'absolute', bottom: 14, left: 20, display: 'flex', gap: 10 }}>
+        {rows.slice(0, 2).map((r, i) => (
+          <span key={i} style={{ fontSize: 9, color: 'rgba(0,0,0,0.6)' }}>{r.text}</span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Layout 6: QR Focus ───────────────────────────────────────
+// Large QR on the left, info stacked vertically beside it.
+function LayoutQrFocus({ profile, publicUrl, accentHex, qrId }) {
+  const rows = getContactRows(profile)
+  return (
+    <div style={{
+      width: CARD_W, height: CARD_H, borderRadius: 14,
+      background: `linear-gradient(160deg, #111111, ${accentHex}14)`,
+      display: 'flex', alignItems: 'center', gap: 18,
+      boxSizing: 'border-box', padding: '20px 22px',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+    }}>
+      <div style={{ background: '#fff', borderRadius: 10, padding: 8, flexShrink: 0, display: 'flex' }}>
+        <QRCodeSVG id={qrId} value={publicUrl} size={84} />
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#fff' }}>
+          {profile.display_name || 'Your name'}
+        </p>
+        <p style={{ margin: '3px 0 10px', fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: accentHex }}>
+          {profile.title || 'Title'}{profile.company ? ` · ${profile.company}` : ''}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          {rows.map((r, i) => (
+            <span key={i} style={{ fontSize: 9, color: '#999' }}>{r.text}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const LAYOUTS = [
+  { id: 'classic',  name: 'Classic',  Component: LayoutClassic },
+  { id: 'centered', name: 'Centered', Component: LayoutCentered },
+  { id: 'split',    name: 'Split',    Component: LayoutSplit },
+  { id: 'minimal',  name: 'Minimal',  Component: LayoutMinimal },
+  { id: 'bold',     name: 'Bold',     Component: LayoutBold },
+  { id: 'qrfocus',  name: 'QR Focus', Component: LayoutQrFocus },
+]
+
 export default function PrintCardModal({ isOpen, onClose, profile, publicUrl }) {
   const [selectedColorId, setSelectedColorId] = useState('green')
+  const [selectedLayoutId, setSelectedLayoutId] = useState('classic')
   const [downloading, setDownloading] = useState(false)
   const previewRef = useRef(null)
 
@@ -113,6 +286,7 @@ export default function PrintCardModal({ isOpen, onClose, profile, publicUrl }) 
   if (!isOpen) return null
 
   const accentHex = COLORS.find(c => c.id === selectedColorId).hex
+  const SelectedLayout = LAYOUTS.find(l => l.id === selectedLayoutId).Component
 
   const handlePrint = () => {
     window.print()
@@ -132,7 +306,7 @@ export default function PrintCardModal({ isOpen, onClose, profile, publicUrl }) 
         useCORS: true,
       })
       const a = document.createElement('a')
-      a.download = `kard-card-${selectedColorId}.png`
+      a.download = `kard-card-${selectedLayoutId}-${selectedColorId}.png`
       a.href = canvas.toDataURL('image/png')
       a.click()
     } finally {
@@ -158,7 +332,7 @@ export default function PrintCardModal({ isOpen, onClose, profile, publicUrl }) 
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#fff' }}>Choose your color</p>
+          <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#fff' }}>Customize your card</p>
           <button
             onClick={onClose}
             style={{ background: 'transparent', border: 'none', color: C.textSecond, fontSize: 18, cursor: 'pointer' }}
@@ -170,11 +344,61 @@ export default function PrintCardModal({ isOpen, onClose, profile, publicUrl }) 
         {/* Card preview (also the printable + downloadable node) */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 22 }}>
           <div ref={previewRef} className="kard-printable-card">
-            <CardTemplate profile={profile} publicUrl={publicUrl} accentHex={accentHex} qrId="kard-qr-preview" />
+            <SelectedLayout profile={profile} publicUrl={publicUrl} accentHex={accentHex} qrId="kard-qr-preview" />
           </div>
         </div>
 
+        {/* Layout carousel — swipe/scroll horizontally to browse */}
+        <p style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: C.textSecond }}>
+          Layout
+        </p>
+        <style>{`
+          .kard-layout-scroll::-webkit-scrollbar { display: none; }
+        `}</style>
+        <div
+          className="kard-layout-scroll"
+          style={{
+            display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 6, marginBottom: 22,
+            scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none', msOverflowStyle: 'none',
+          }}
+        >
+          {LAYOUTS.map(layout => {
+            const { Component } = layout
+            const selected = layout.id === selectedLayoutId
+            const scale = 0.26
+            return (
+              <button
+                key={layout.id}
+                onClick={() => setSelectedLayoutId(layout.id)}
+                style={{
+                  flexShrink: 0, scrollSnapAlign: 'start', cursor: 'pointer',
+                  background: 'transparent', border: 'none', padding: 0,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                }}
+              >
+                <div style={{
+                  width: CARD_W * scale, height: CARD_H * scale, borderRadius: 6,
+                  overflow: 'hidden', position: 'relative',
+                  border: selected ? `2px solid ${accentHex}` : '2px solid transparent',
+                  boxShadow: selected ? `0 0 0 1px ${accentHex}` : '0 0 0 1px rgba(255,255,255,0.06)',
+                }}>
+                  <div style={{ width: CARD_W, height: CARD_H, transform: `scale(${scale})`, transformOrigin: 'top left', pointerEvents: 'none' }}>
+                    <Component profile={profile} publicUrl={publicUrl} accentHex={accentHex} qrId={`kard-qr-thumb-${layout.id}`} />
+                  </div>
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 600, color: selected ? C.textPrimary : C.textSecond }}>
+                  {layout.name}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
         {/* Color swatches */}
+        <p style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: C.textSecond }}>
+          Color
+        </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 22, flexWrap: 'wrap' }}>
           {COLORS.map(c => (
             <button

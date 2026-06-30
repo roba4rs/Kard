@@ -415,11 +415,11 @@ export default function Dashboard() {
   }
 
   const downloadQR = () => {
-    const svg = document.getElementById('kard-qr')
+    const svg = document.getElementById('kard-qr-download')
     const svgData = new XMLSerializer().serializeToString(svg)
     const canvas = document.createElement('canvas')
-    canvas.width = 200
-    canvas.height = 200
+    canvas.width = 300
+    canvas.height = 300
     const ctx = canvas.getContext('2d')
     const img = new Image()
     img.onload = () => {
@@ -860,49 +860,63 @@ export default function Dashboard() {
               </span>
             </div>
 
-            {/* QR code */}
-            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            {/* Hidden full-resolution QR, used only by downloadQR */}
+            <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
+              <QRCodeSVG id="kard-qr-download" value={publicUrl} size={300} />
+            </div>
+
+            {/* QR code + stat grid, side by side */}
+            <div style={{ display: 'flex', gap: 14, marginBottom: 16 }}>
               <div style={{
-                display: 'inline-block',
+                flexShrink: 0,
+                width: 132,
                 background: '#ffffff',
-                padding: 16,
                 borderRadius: 12,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 10,
+                boxSizing: 'border-box',
               }}>
                 <QRCodeSVG
                   id="kard-qr"
                   value={publicUrl}
-                  size={160}
+                  size={112}
                 />
               </div>
-            </div>
 
-            {/* Stat grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 10,
-              marginBottom: 16,
-            }}>
-              {[
-                { label: 'Total views', value: stats.totalViews },
-                { label: 'This week', value: stats.weekViews },
-                { label: 'Saves', value: stats.saves },
-                { label: 'Calls', value: stats.calls },
-              ].map(stat => (
-                <div key={stat.label} style={{
-                  background: C.inputBg,
-                  border: `1px solid ${C.inputBorder}`,
-                  borderRadius: 10,
-                  padding: '14px 16px',
-                }}>
-                  <p style={{ margin: '0 0 2px', fontSize: 20, fontWeight: 700, color: C.textPrimary }}>
-                    {stat.value}
-                  </p>
-                  <p style={{ margin: 0, fontSize: 12, color: C.textSecond }}>
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
+              <div style={{
+                flex: 1,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gridTemplateRows: '1fr 1fr',
+                gap: 10,
+              }}>
+                {[
+                  { label: 'Total views', value: stats.totalViews },
+                  { label: 'This week', value: stats.weekViews },
+                  { label: 'Saves', value: stats.saves },
+                  { label: 'Calls', value: stats.calls },
+                ].map(stat => (
+                  <div key={stat.label} style={{
+                    background: C.inputBg,
+                    border: `1px solid ${C.inputBorder}`,
+                    borderRadius: 10,
+                    padding: '12px 14px',
+                    boxSizing: 'border-box',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                  }}>
+                    <p style={{ margin: '0 0 2px', fontSize: 20, fontWeight: 700, color: C.textPrimary }}>
+                      {stat.value}
+                    </p>
+                    <p style={{ margin: 0, fontSize: 12, color: C.textSecond }}>
+                      {stat.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Action row: Copy / Download / Print */}
