@@ -220,6 +220,42 @@ export default function PublicProfile() {
     setProfile(profileData)
     logView(profileData.id)
 
+    // ── Dynamic link preview metadata ──────────────────────
+    // CRA renders client-side, so these tags don't exist until JS runs.
+    // Most chat apps / Notes / link-preview cards fetch and parse the page
+    // (sometimes via a headless renderer) so this still helps there, even
+    // though it has no effect on the native camera scanner overlay, which
+    // is rendered by the OS before any page content loads at all.
+    const title = profileData.display_name
+      ? `${profileData.display_name} — Kard`
+      : 'Kard'
+    const description = [profileData.title, profileData.company].filter(Boolean).join(' · ') || 'View my digital contact card'
+    const image = profileData.avatar_url || ''
+
+    document.title = title
+
+    const setMeta = (attr, key, content) => {
+      if (!content) return
+      let tag = document.querySelector(`meta[${attr}="${key}"]`)
+      if (!tag) {
+        tag = document.createElement('meta')
+        tag.setAttribute(attr, key)
+        document.head.appendChild(tag)
+      }
+      tag.setAttribute('content', content)
+    }
+
+    setMeta('property', 'og:title', title)
+    setMeta('property', 'og:description', description)
+    setMeta('property', 'og:type', 'profile')
+    setMeta('property', 'og:url', window.location.href)
+    if (image) setMeta('property', 'og:image', image)
+    setMeta('name', 'twitter:card', image ? 'summary' : 'summary_large_image')
+    setMeta('name', 'twitter:title', title)
+    setMeta('name', 'twitter:description', description)
+    if (image) setMeta('name', 'twitter:image', image)
+    setMeta('name', 'description', description)
+
     const { data: linksData } = await supabase
       .from('links')
       .select('*')
