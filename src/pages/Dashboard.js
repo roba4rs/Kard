@@ -40,14 +40,16 @@ const S = {
   container: {
     maxWidth: 560,
     margin: '0 auto',
-    padding: '40px 20px 80px',
+    padding: 'clamp(20px, 5vw, 40px) clamp(12px, 4vw, 20px) 80px',
+    boxSizing: 'border-box',
   },
   card: {
     background: C.cardBg,
     border: `1px solid ${C.cardBorder}`,
     borderRadius: 16,
-    padding: 24,
+    padding: 'clamp(16px, 4vw, 24px)',
     marginBottom: 16,
+    boxSizing: 'border-box',
   },
   cardTitle: {
     fontSize: 15,
@@ -115,6 +117,7 @@ export default function Dashboard() {
     title: '',
     company: '',
     email: '',
+    phone: '',
     slug: '',
     published: true,
   })
@@ -307,8 +310,16 @@ export default function Dashboard() {
             placeholder="robel@example.com"
           />
 
+          <label style={S.label}>Phone (shown on card)</label>
+          <input
+            style={S.input}
+            value={profile.phone || ''}
+            onChange={e => setProfile({ ...profile, phone: e.target.value })}
+            placeholder="+251911223344"
+          />
+
           <label style={S.label}>Slug</label>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', marginBottom: 16, gap: 0 }}>
             <span style={{
               padding: '10px 10px 10px 14px',
               background: C.inputBg,
@@ -322,7 +333,7 @@ export default function Dashboard() {
               kard.app/r/
             </span>
             <input
-              style={{ ...S.input, marginBottom: 0, borderRadius: '0 8px 8px 0', flex: 1 }}
+              style={{ ...S.input, marginBottom: 0, borderRadius: '0 8px 8px 0', flex: 1, minWidth: 100 }}
               value={profile.slug}
               onChange={e => setProfile({ ...profile, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
               placeholder="your-name"
@@ -394,9 +405,9 @@ export default function Dashboard() {
           )}
 
           {links.map(link => (
-            <div key={link.id} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+            <div key={link.id} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 10 }}>
               <select
-                style={{ ...S.input, marginBottom: 0, width: 148, flexShrink: 0 }}
+                style={{ ...S.input, marginBottom: 0, width: 148, flex: '1 1 140px' }}
                 value={link.platform}
                 onChange={e => updateLink(link.id, 'platform', e.target.value)}
               >
@@ -408,7 +419,7 @@ export default function Dashboard() {
               </select>
 
               <input
-                style={{ ...S.input, marginBottom: 0, flex: 1 }}
+                style={{ ...S.input, marginBottom: 0, flex: '3 1 180px' }}
                 value={link.url}
                 onChange={e => updateLink(link.id, 'url', e.target.value)}
                 placeholder="https://..."
@@ -416,7 +427,7 @@ export default function Dashboard() {
 
               {link.platform === 'other' && (
                 <input
-                  style={{ ...S.input, marginBottom: 0, width: 110, flexShrink: 0 }}
+                  style={{ ...S.input, marginBottom: 0, flex: '1 1 110px' }}
                   value={link.label}
                   onChange={e => updateLink(link.id, 'label', e.target.value)}
                   placeholder="Label"

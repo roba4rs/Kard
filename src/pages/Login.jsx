@@ -113,8 +113,9 @@ const pageStyle = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '20px',
+  padding: 'clamp(12px, 4vw, 20px)',
   fontFamily: 'system-ui, -apple-system, sans-serif',
+  boxSizing: 'border-box',
 }
 
 const cardStyle = {
@@ -123,7 +124,7 @@ const cardStyle = {
   background: '#111111',
   border: '1px solid #222222',
   borderRadius: 16,
-  padding: '40px 32px',
+  padding: 'clamp(24px, 6vw, 40px) clamp(20px, 5vw, 32px)',
   boxSizing: 'border-box',
 }
 
