@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import PrintCardModal from '../components/PrintCardModal'
+import AvatarCropModal from '../components/AvatarCropModal'
+import { COUNTRY_CODES, parsePhone, getCountry } from '../data/countryCodes'
 
 const PLATFORMS = ['linkedin', 'github', 'instagram', 'telegram', 'website', 'other']
 
@@ -19,6 +21,7 @@ const TABS = [
   { id: 'profile', label: 'Profile' },
   { id: 'links', label: 'Links' },
   { id: 'qr', label: 'QR Code' },
+  { id: 'preview', label: 'Preview' },
 ]
 
 // ── Design tokens ──────────────────────────────────────────
@@ -130,6 +133,7 @@ export default function Dashboard() {
     email: '',
     phone: '',
     slug: '',
+    avatar_url: null,
     published: true,
   })
   const [links, setLinks] = useState([])
@@ -140,6 +144,12 @@ export default function Dashboard() {
   const [linksMessage, setLinksMessage] = useState(null)
   const [stats, setStats] = useState({ totalViews: 0, weekViews: 0, saves: 0, calls: 0 })
   const [printModalOpen, setPrintModalOpen] = useState(false)
+  const [phoneCountry, setPhoneCountry] = useState('ET')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [cropFile, setCropFile] = useState(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [previewKey, setPreviewKey] = useState(0)
+  const fileInputRef = useRef(null)
 
   const fetchProfile = useCallback(async () => {
     const { data } = await supabase
@@ -150,6 +160,9 @@ export default function Dashboard() {
 
     if (data) {
       setProfile(data)
+      const parsed = parsePhone(data.phone)
+      setPhoneCountry(parsed.iso2)
+      setPhoneNumber(parsed.number)
     } else {
       const baseSlug = user.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-')
       setProfile(prev => ({ ...prev, slug: baseSlug, email: user.email }))
@@ -191,15 +204,49 @@ export default function Dashboard() {
   const saveProfile = async () => {
     setSaving(true)
     setMessage(null)
+    const dial = getCountry(phoneCountry).dial
+    const combinedPhone = phoneNumber ? `+${dial}${phoneNumber.replace(/[^0-9]/g, '')}` : ''
     const { error } = await supabase
       .from('profiles')
-      .upsert({ ...profile, id: user.id })
+      .upsert({ ...profile, phone: combinedPhone, id: user.id })
     if (error) {
       setMessage({ type: 'error', text: error.message })
     } else {
+      setProfile(prev => ({ ...prev, phone: combinedPhone }))
       setMessage({ type: 'success', text: 'Profile saved!' })
     }
     setSaving(false)
+  }
+
+  const handleAvatarFileSelect = (e) => {
+    const file = e.target.files?.[0]
+    if (file) setCropFile(file)
+    e.target.value = '' // allow re-selecting the same file later
+  }
+
+  const handleAvatarCropConfirm = async (blob) => {
+    setCropFile(null)
+    setUploadingAvatar(true)
+    try {
+      const path = `${user.id}/avatar.jpg`
+      const { error: uploadError } = await supabase
+        .storage
+        .from('avatars')
+        .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+
+      if (uploadError) {
+        setMessage({ type: 'error', text: uploadError.message })
+        return
+      }
+
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+      // cache-bust so the new photo shows immediately
+      const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`
+      setProfile(prev => ({ ...prev, avatar_url: avatarUrl }))
+      setMessage({ type: 'success', text: 'Photo updated — click Save profile to confirm.' })
+    } finally {
+      setUploadingAvatar(false)
+    }
   }
 
   const addLink = () => {
@@ -302,8 +349,11 @@ export default function Dashboard() {
             justifyContent: 'center',
             letterSpacing: '-0.5px',
             flexShrink: 0,
+            overflow: 'hidden',
           }}>
-            {getInitials()}
+            {profile.avatar_url
+              ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : getInitials()}
           </div>
           <div style={{ minWidth: 0 }}>
             <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: C.textPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -349,6 +399,36 @@ export default function Dashboard() {
         {/* ── PROFILE TAB ───────────────────────────────────── */}
         {activeTab === 'profile' && (
           <div style={S.card}>
+            {/* Photo upload */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 22 }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%', background: C.inputBg,
+                border: `1px solid ${C.inputBorder}`, overflow: 'hidden', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 20, fontWeight: 700, color: C.textSecond,
+              }}>
+                {profile.avatar_url
+                  ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : getInitials()}
+              </div>
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarFileSelect}
+                  style={{ display: 'none' }}
+                />
+                <button
+                  style={S.btnGhost}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                >
+                  {uploadingAvatar ? 'Uploading...' : profile.avatar_url ? 'Change photo' : 'Upload photo'}
+                </button>
+              </div>
+            </div>
+
             <label style={S.label}>Display name</label>
             <input
               style={S.input}
@@ -387,12 +467,26 @@ export default function Dashboard() {
             />
 
             <label style={S.label}>Phone</label>
-            <input
-              style={S.input}
-              value={profile.phone || ''}
-              onChange={e => setProfile({ ...profile, phone: e.target.value })}
-              placeholder="+251911223344"
-            />
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+              <select
+                style={{ ...S.input, marginBottom: 0, width: 'auto', flexShrink: 0, paddingRight: 8 }}
+                value={phoneCountry}
+                onChange={e => setPhoneCountry(e.target.value)}
+              >
+                {COUNTRY_CODES.map(c => (
+                  <option key={c.iso2} value={c.iso2}>
+                    {c.flag} +{c.dial}
+                  </option>
+                ))}
+              </select>
+              <input
+                style={{ ...S.input, marginBottom: 0, flex: 1 }}
+                value={phoneNumber}
+                onChange={e => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="911223344"
+                inputMode="numeric"
+              />
+            </div>
 
             <label style={S.label}>Public slug</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', marginBottom: 16, gap: 0 }}>
@@ -640,6 +734,55 @@ export default function Dashboard() {
               Set a public slug on the Profile tab to generate your QR code.
             </p>
           </div>
+        )}
+
+        {/* ── PREVIEW TAB ───────────────────────────────────── */}
+        {activeTab === 'preview' && profile.slug && (
+          <div style={S.card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <p style={{ ...S.cardTitle, marginBottom: 0 }}>Public page preview</p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button style={S.btnGhost} onClick={() => setPreviewKey(k => k + 1)}>
+                  Refresh
+                </button>
+                <a href={publicUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                  <button style={S.btnGhost}>Open in new tab</button>
+                </a>
+              </div>
+            </div>
+            <div style={{
+              border: `1px solid ${C.inputBorder}`,
+              borderRadius: 12,
+              overflow: 'hidden',
+              background: '#000',
+            }}>
+              <iframe
+                key={previewKey}
+                src={publicUrl}
+                title="Public page preview"
+                style={{ width: '100%', height: 560, border: 'none', display: 'block' }}
+              />
+            </div>
+            <p style={{ marginTop: 10, fontSize: 12, color: C.textMuted }}>
+              Save your profile first — this shows the live public page, not unsaved edits.
+            </p>
+          </div>
+        )}
+
+        {activeTab === 'preview' && !profile.slug && (
+          <div style={S.card}>
+            <p style={{ color: C.textMuted, fontSize: 13, margin: 0 }}>
+              Set a public slug on the Profile tab to preview your page.
+            </p>
+          </div>
+        )}
+
+        {cropFile && (
+          <AvatarCropModal
+            file={cropFile}
+            onCancel={() => setCropFile(null)}
+            onConfirm={handleAvatarCropConfirm}
+          />
         )}
 
       </div>
