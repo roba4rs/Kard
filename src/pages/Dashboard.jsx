@@ -6,15 +6,131 @@ import PrintCardModal from '../components/PrintCardModal'
 import AvatarCropModal from '../components/AvatarCropModal'
 import { COUNTRY_CODES, parsePhone, getCountry } from '../data/countryCodes'
 
-const PLATFORMS = ['linkedin', 'github', 'instagram', 'telegram', 'website', 'other']
+const PLATFORMS = ['linkedin', 'github', 'instagram', 'facebook', 'tiktok', 'threads', 'telegram', 'website', 'other']
 
-const PLATFORM_ICONS = {
-  linkedin: '💼',
-  github: '🐙',
-  instagram: '📷',
-  telegram: '✈️',
-  website: '🌐',
-  other: '🔗',
+const PLATFORM_LABELS = {
+  linkedin: 'LinkedIn',
+  github: 'GitHub',
+  instagram: 'Instagram',
+  facebook: 'Facebook',
+  tiktok: 'TikTok',
+  threads: 'Threads',
+  telegram: 'Telegram',
+  website: 'Website',
+  other: 'Other',
+}
+
+// Brand background per platform (used behind the icon glyph)
+const PLATFORM_BG = {
+  linkedin: '#0A66C2',
+  github: '#24292F',
+  instagram: 'linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7)',
+  facebook: '#1877F2',
+  tiktok: '#000000',
+  threads: '#000000',
+  telegram: '#26A5E4',
+  website: '#2a2a2a',
+  other: '#2a2a2a',
+}
+
+// Simple, recognizable glyphs (not official brand SVGs) rendered in white
+// on top of the brand-colored badge background above.
+function PlatformGlyph({ platform, size = 18 }) {
+  const common = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none' }
+  switch (platform) {
+    case 'linkedin':
+      return (
+        <svg {...common}>
+          <rect x="3" y="9" width="3.2" height="11" fill="#fff" />
+          <circle cx="4.6" cy="4.8" r="2" fill="#fff" />
+          <path d="M10.5 9h3v1.7c.6-1 1.7-2 3.5-2 3 0 4 1.9 4 5V20h-3.2v-5.7c0-1.4-.5-2.4-1.8-2.4-1 0-1.6.7-1.9 1.3-.1.3-.1.6-.1 1V20h-3.2c0-7.8 0-9.4 0-11Z" fill="#fff" />
+        </svg>
+      )
+    case 'github':
+      return (
+        <svg {...common}>
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M12 2a10 10 0 0 0-3.16 19.5c.5.1.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.64-1.33-2.22-.25-4.56-1.11-4.56-4.95 0-1.1.39-2 1.03-2.7-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.03a9.6 9.6 0 0 1 5 0c1.9-1.3 2.75-1.03 2.75-1.03.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.7 0 3.85-2.34 4.7-4.57 4.94.36.31.68.93.68 1.87v2.78c0 .26.18.58.69.48A10 10 0 0 0 12 2Z"
+            fill="#fff"
+          />
+        </svg>
+      )
+    case 'instagram':
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="18" height="18" rx="5" stroke="#fff" strokeWidth="1.8" />
+          <circle cx="12" cy="12" r="4.2" stroke="#fff" strokeWidth="1.8" />
+          <circle cx="17.2" cy="6.8" r="1.1" fill="#fff" />
+        </svg>
+      )
+    case 'facebook':
+      return (
+        <svg {...common}>
+          <path d="M14.5 21v-7.2h2.4l.4-2.8h-2.8V9.2c0-.8.2-1.4 1.4-1.4h1.5V5.3c-.3 0-1.1-.1-2.1-.1-2.1 0-3.6 1.3-3.6 3.7v2.1H9.2v2.8h2.5V21h2.8Z" fill="#fff" />
+        </svg>
+      )
+    case 'tiktok':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <path d="M16.6 5.82a4.28 4.28 0 0 1-2.45-3.32h-.02V2h-3.14v13.4a2.6 2.6 0 1 1-1.84-2.49V9.66a5.74 5.74 0 0 0-.92-.07A5.86 5.86 0 1 0 14.1 15.4V9.1a7.4 7.4 0 0 0 4.32 1.38V7.34a4.25 4.25 0 0 1-1.82-.4l.02-.02a4.3 4.3 0 0 1-2.02-1.1Z" fill="#25F4EE" transform="translate(-0.9,0.6)" />
+          <path d="M16.6 5.82a4.28 4.28 0 0 1-2.45-3.32h-.02V2h-3.14v13.4a2.6 2.6 0 1 1-1.84-2.49V9.66a5.74 5.74 0 0 0-.92-.07A5.86 5.86 0 1 0 14.1 15.4V9.1a7.4 7.4 0 0 0 4.32 1.38V7.34a4.25 4.25 0 0 1-1.82-.4l.02-.02a4.3 4.3 0 0 1-2.02-1.1Z" fill="#FE2C55" transform="translate(0.9,-0.6)" />
+          <path d="M16.6 5.82a4.28 4.28 0 0 1-2.45-3.32h-.02V2h-3.14v13.4a2.6 2.6 0 1 1-1.84-2.49V9.66a5.74 5.74 0 0 0-.92-.07A5.86 5.86 0 1 0 14.1 15.4V9.1a7.4 7.4 0 0 0 4.32 1.38V7.34a4.25 4.25 0 0 1-1.82-.4l.02-.02a4.3 4.3 0 0 1-2.02-1.1Z" fill="#ffffff" />
+        </svg>
+      )
+    case 'threads':
+      return (
+        <svg {...common}>
+          <path
+            d="M12 2C6.8 2 4 5.6 4 11.9 4 18 6.8 22 12 22c4 0 6.5-2 7.3-5.4l-2.5-.6c-.5 2-1.7 3.4-4.3 3.4-3 0-4.6-2-4.8-5.3.9.6 2.2.9 3.7.9 3.5 0 5.7-1.7 5.7-4.4 0-2.6-2-4.3-5-4.3-2.5 0-4.4 1.1-5.3 3l2.3 1.1c.5-1 1.5-1.6 2.8-1.6 1.4 0 2.3.6 2.3 1.7 0 1-1 1.6-2.9 1.6-.9 0-1.8-.2-2.6-.5.3-3 1.7-4.4 4-4.4 2 0 3.4 1 4 2.8l2.4-.8C18.8 3.6 16.2 2 12 2Z"
+            fill="#fff"
+          />
+        </svg>
+      )
+    case 'telegram':
+      return (
+        <svg {...common}>
+          <path d="M21 4 2.5 11.3c-.7.3-.7 1.3.1 1.5l4.4 1.4 1.7 5.3c.2.7 1.1.9 1.6.3l2.4-2.6 4.6 3.4c.6.4 1.4.1 1.6-.6L22 4.8c.2-.7-.5-1.3-1-.8ZM8 13.9l8.4-6c.3-.2.6.2.3.4l-6.8 6.3-.3 3-1.6-3.7Z" fill="#fff" />
+        </svg>
+      )
+    case 'website':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="9" stroke="#fff" strokeWidth="1.6" />
+          <ellipse cx="12" cy="12" rx="4" ry="9" stroke="#fff" strokeWidth="1.6" />
+          <path d="M3 12h18M4.2 7.5h15.6M4.2 16.5h15.6" stroke="#fff" strokeWidth="1.6" />
+        </svg>
+      )
+    default:
+      return (
+        <svg {...common}>
+          <path
+            d="M9.5 14.5 14.5 9.5M8 11l-1.5 1.5a3 3 0 0 0 4.2 4.2L12 15.4M16 13l1.5-1.5a3 3 0 0 0-4.2-4.2L12 8.6"
+            stroke="#fff"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      )
+  }
+}
+
+function PlatformBadge({ platform, size = 34 }) {
+  return (
+    <div style={{
+      width: size,
+      height: size,
+      borderRadius: Math.round(size * 0.28),
+      background: PLATFORM_BG[platform] || '#2a2a2a',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    }}>
+      <PlatformGlyph platform={platform} size={Math.round(size * 0.52)} />
+    </div>
+  )
 }
 
 const TABS = [
@@ -540,8 +656,25 @@ export default function Dashboard() {
         {activeTab === 'links' && (
           <div style={S.card}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <p style={{ ...S.cardTitle, marginBottom: 0 }}>Links</p>
-              <button style={S.btnGhost} onClick={addLink}>+ Add link</button>
+              <p style={{ ...S.cardTitle, marginBottom: 0, fontSize: 17 }}>Links</p>
+              <button
+                onClick={addLink}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '8px 16px',
+                  background: C.accentSoft,
+                  color: C.accent,
+                  border: 'none',
+                  borderRadius: 999,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                + Add link
+              </button>
             </div>
 
             {links.length === 0 && (
@@ -551,59 +684,125 @@ export default function Dashboard() {
             )}
 
             {links.map(link => (
-              <div key={link.id} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 10 }}>
-                <select
-                  style={{ ...S.input, marginBottom: 0, width: 148, flex: '1 1 140px' }}
-                  value={link.platform}
-                  onChange={e => updateLink(link.id, 'platform', e.target.value)}
-                >
-                  {PLATFORMS.map(p => (
-                    <option key={p} value={p}>
-                      {PLATFORM_ICONS[p]} {p}
-                    </option>
-                  ))}
-                </select>
+              <div
+                key={link.id}
+                style={{
+                  background: C.inputBg,
+                  border: `1px solid ${C.inputBorder}`,
+                  borderRadius: 14,
+                  padding: 14,
+                  marginBottom: 12,
+                }}
+              >
+                {/* Top row: icon badge, platform select, remove button */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <PlatformBadge platform={link.platform} size={34} />
 
+                  <select
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      background: 'transparent',
+                      border: 'none',
+                      outline: 'none',
+                      color: C.textPrimary,
+                      fontSize: 15,
+                      fontWeight: 600,
+                      textTransform: 'capitalize',
+                      cursor: 'pointer',
+                    }}
+                    value={link.platform}
+                    onChange={e => updateLink(link.id, 'platform', e.target.value)}
+                  >
+                    {PLATFORMS.map(p => (
+                      <option key={p} value={p} style={{ background: C.inputBg, color: C.textPrimary }}>
+                        {PLATFORM_LABELS[p]}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    onClick={() => removeLink(link.id, link.isNew)}
+                    style={{
+                      flexShrink: 0,
+                      width: 26,
+                      height: 26,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'transparent',
+                      border: 'none',
+                      color: C.textSecond,
+                      fontSize: 14,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* URL input */}
                 <input
-                  style={{ ...S.input, marginBottom: 0, flex: '3 1 180px' }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '12px 14px',
+                    background: C.cardBg,
+                    border: `1px solid ${C.cardBorder}`,
+                    borderRadius: 10,
+                    fontSize: 14,
+                    color: C.textPrimary,
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                  }}
                   value={link.url}
                   onChange={e => updateLink(link.id, 'url', e.target.value)}
                   placeholder="https://..."
                 />
 
+                {/* Label input — only for "other" platform */}
                 {link.platform === 'other' && (
                   <input
-                    style={{ ...S.input, marginBottom: 0, flex: '1 1 110px' }}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '12px 14px',
+                      marginTop: 8,
+                      background: C.cardBg,
+                      border: `1px solid ${C.cardBorder}`,
+                      borderRadius: 10,
+                      fontSize: 14,
+                      color: C.textPrimary,
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
                     value={link.label}
                     onChange={e => updateLink(link.id, 'label', e.target.value)}
                     placeholder="Label"
                   />
                 )}
-
-                <button
-                  onClick={() => removeLink(link.id, link.isNew)}
-                  style={{
-                    ...S.btnGhost,
-                    flexShrink: 0,
-                    padding: '8px 10px',
-                    color: C.danger,
-                    borderColor: 'transparent',
-                    fontSize: 13,
-                  }}
-                >
-                  ✕
-                </button>
               </div>
             ))}
 
             {linksMessage && (
-              <p style={{ ...(linksMessage.type === 'error' ? S.errorMsg : S.successMsg), marginTop: 12 }}>
+              <p style={{ ...(linksMessage.type === 'error' ? S.errorMsg : S.successMsg), marginTop: 4 }}>
                 {linksMessage.text}
               </p>
             )}
 
             {links.length > 0 && (
-              <button style={{ ...S.btnPrimary, marginTop: 12 }} onClick={saveLinks} disabled={savingLinks}>
+              <button
+                style={{
+                  ...S.btnPrimary,
+                  marginTop: 12,
+                  background: C.accent,
+                  borderRadius: 999,
+                  padding: '15px',
+                  fontSize: 15,
+                }}
+                onClick={saveLinks}
+                disabled={savingLinks}
+              >
                 {savingLinks ? 'Saving...' : 'Save links'}
               </button>
             )}

@@ -18,6 +18,22 @@ const IconTelegram = () => (
 const IconWebsite = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.93 6h-3.1a15.7 15.7 0 0 0-1.39-3.92A8.03 8.03 0 0 1 18.93 8zM12 4.06c.79 1.06 1.62 2.6 2.1 3.94H9.9c.48-1.34 1.31-2.88 2.1-3.94zM4.26 14a8.1 8.1 0 0 1 0-4h3.49a16.7 16.7 0 0 0 0 4H4.26zm.81 2h3.1c.34 1.41.84 2.74 1.39 3.92A8.03 8.03 0 0 1 5.07 16zm3.1-8H5.07a8.03 8.03 0 0 1 4.49-3.92A15.7 15.7 0 0 0 8.17 8zM12 19.94c-.79-1.06-1.62-2.6-2.1-3.94h4.2c-.48 1.34-1.31 2.88-2.1 3.94zM14.45 14H9.55a14.7 14.7 0 0 1 0-4h4.9a14.7 14.7 0 0 1 0 4zm.2 5.92c.55-1.18 1.05-2.51 1.39-3.92h3.1a8.03 8.03 0 0 1-4.49 3.92zM16.25 14a16.7 16.7 0 0 0 0-4h3.49a8.1 8.1 0 0 1 0 4h-3.49z"/></svg>
 )
+const IconFacebook = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.45h-1.26c-1.24 0-1.63.77-1.63 1.56v1.89h2.78l-.44 2.91h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94z"/></svg>
+)
+// TikTok's mark is a layered note (cyan + magenta offset behind a white note) —
+// rendered with explicit fills rather than currentColor so the layering reads
+// correctly on the dark tile background.
+const IconTikTok = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+    <path d="M16.6 5.82a4.28 4.28 0 0 1-2.45-3.32h-.02V2h-3.14v13.4a2.6 2.6 0 1 1-1.84-2.49V9.66a5.74 5.74 0 0 0-.92-.07A5.86 5.86 0 1 0 14.1 15.4V9.1a7.4 7.4 0 0 0 4.32 1.38V7.34a4.25 4.25 0 0 1-1.82-.4l.02-.02a4.3 4.3 0 0 1-2.02-1.1Z" fill="#25F4EE" transform="translate(-0.9,0.6)"/>
+    <path d="M16.6 5.82a4.28 4.28 0 0 1-2.45-3.32h-.02V2h-3.14v13.4a2.6 2.6 0 1 1-1.84-2.49V9.66a5.74 5.74 0 0 0-.92-.07A5.86 5.86 0 1 0 14.1 15.4V9.1a7.4 7.4 0 0 0 4.32 1.38V7.34a4.25 4.25 0 0 1-1.82-.4l.02-.02a4.3 4.3 0 0 1-2.02-1.1Z" fill="#FE2C55" transform="translate(0.9,-0.6)"/>
+    <path d="M16.6 5.82a4.28 4.28 0 0 1-2.45-3.32h-.02V2h-3.14v13.4a2.6 2.6 0 1 1-1.84-2.49V9.66a5.74 5.74 0 0 0-.92-.07A5.86 5.86 0 1 0 14.1 15.4V9.1a7.4 7.4 0 0 0 4.32 1.38V7.34a4.25 4.25 0 0 1-1.82-.4l.02-.02a4.3 4.3 0 0 1-2.02-1.1Z" fill="#ffffff"/>
+  </svg>
+)
+const IconThreads = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.2 2C7 2.04 4 5.6 4 11.9 4 18 7 22 12.2 22c4 0 6.6-2.1 7.4-5.6l-2.46-.55c-.5 2.1-1.9 3.6-4.7 3.6-3.2 0-5-2.1-5.2-5.7.9.6 2.3 1 3.9 1 3.7 0 6-1.8 6-4.7 0-2.8-2.1-4.6-5.3-4.6-2.6 0-4.6 1.2-5.5 3.1l2.3 1.1c.5-1.1 1.6-1.7 3-1.7 1.5 0 2.5.7 2.5 1.9 0 1.1-1.1 1.7-3.1 1.7-1 0-2-.2-2.8-.5.3-3.1 1.8-4.6 4.3-4.6 2.2 0 3.7 1.1 4.3 3l2.4-.7C18.9 3.6 16.1 2 12.2 2Z"/></svg>
+)
 const IconLink = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12a4.1 4.1 0 0 1 4.1-4.1h4V6H8a6 6 0 0 0 0 12h4v-1.9H8A4.1 4.1 0 0 1 3.9 12zM9 13h6v-2H9v2zm7-7h-4v1.9h4a4.1 4.1 0 0 1 0 8.2h-4V18h4a6 6 0 0 0 0-12z"/></svg>
 )
@@ -42,6 +58,9 @@ const PLATFORM_META = {
   linkedin:  { Icon: IconLinkedIn,  bg: '#e8f0fe', color: '#0a66c2', label: 'LinkedIn' },
   github:    { Icon: IconGitHub,    bg: '#1c1c1c', color: '#ffffff', label: 'GitHub' },
   instagram: { Icon: IconInstagram, bg: '#fde8f3', color: '#c13584', label: 'Instagram' },
+  facebook:  { Icon: IconFacebook,  bg: '#e7f0fe', color: '#1877f2', label: 'Facebook' },
+  tiktok:    { Icon: IconTikTok,    bg: '#000000', color: '#ffffff', label: 'TikTok' },
+  threads:   { Icon: IconThreads,   bg: '#1c1c1c', color: '#ffffff', label: 'Threads' },
   telegram:  { Icon: IconTelegram,  bg: '#e6f4ff', color: '#229ed9', label: 'Telegram' },
   website:   { Icon: IconWebsite,   bg: '#dcfce7', color: '#16a34a', label: 'Website' },
   other:     { Icon: IconLink,      bg: '#1c1c1c', color: '#ffffff', label: null },
