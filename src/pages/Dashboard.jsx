@@ -24,6 +24,15 @@ const TABS = [
   { id: 'preview', label: 'Preview' },
 ]
 
+// Pulls the storage path (e.g. "userid/avatar-12345.jpg") back out of a
+// Supabase public URL, so we can delete the previous avatar file on re-upload.
+function extractAvatarPath(publicUrl) {
+  const marker = '/avatars/'
+  const idx = publicUrl.indexOf(marker)
+  if (idx === -1) return null
+  return publicUrl.slice(idx + marker.length).split('?')[0]
+}
+
 // ── Design tokens ──────────────────────────────────────────
 const C = {
   bg:          '#0a0a0a',
@@ -228,11 +237,11 @@ export default function Dashboard() {
     setCropFile(null)
     setUploadingAvatar(true)
     try {
-      const path = `${user.id}/avatar.jpg`
+      const path = `${user.id}/avatar-${Date.now()}.jpg`
       const { error: uploadError } = await supabase
         .storage
         .from('avatars')
-        .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+        .upload(path, blob, { upsert: false, contentType: 'image/jpeg' })
 
       if (uploadError) {
         setMessage({ type: 'error', text: uploadError.message })
@@ -240,10 +249,15 @@ export default function Dashboard() {
       }
 
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
-      // cache-bust so the new photo shows immediately
-      const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`
-      setProfile(prev => ({ ...prev, avatar_url: avatarUrl }))
+      const oldPath = profile.avatar_url ? extractAvatarPath(profile.avatar_url) : null
+
+      setProfile(prev => ({ ...prev, avatar_url: urlData.publicUrl }))
       setMessage({ type: 'success', text: 'Photo updated — click Save profile to confirm.' })
+
+      // Best-effort cleanup of the previous avatar file (non-blocking, ignore failures)
+      if (oldPath) {
+        supabase.storage.from('avatars').remove([oldPath]).catch(() => {})
+      }
     } finally {
       setUploadingAvatar(false)
     }

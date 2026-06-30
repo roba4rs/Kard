@@ -17,9 +17,19 @@ export default function AvatarCropModal({ file, onCancel, onConfirm }) {
   const [imgUrl] = useState(() => URL.createObjectURL(file))
   const [zoom, setZoom] = useState(1)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const [naturalSize, setNaturalSize] = useState(null) // { w, h }
   const dragRef = useRef({ dragging: false, startX: 0, startY: 0, startOffset: { x: 0, y: 0 } })
   const frameRef = useRef(null)
   const [uploading, setUploading] = useState(false)
+
+  // "Cover" sizing computed manually, in px — html2canvas does not
+  // reliably honor CSS object-fit when rasterizing, so we avoid it
+  // entirely and size the <img> explicitly instead.
+  const baseScale = naturalSize
+    ? Math.max(VIEWPORT / naturalSize.w, VIEWPORT / naturalSize.h)
+    : 1
+  const imgWidth = naturalSize ? naturalSize.w * baseScale : VIEWPORT
+  const imgHeight = naturalSize ? naturalSize.h * baseScale : VIEWPORT
 
   const startDrag = (clientX, clientY) => {
     dragRef.current = { dragging: true, startX: clientX, startY: clientY, startOffset: offset }
@@ -97,9 +107,14 @@ export default function AvatarCropModal({ file, onCancel, onConfirm }) {
             src={imgUrl}
             alt="crop preview"
             draggable={false}
+            onLoad={e => setNaturalSize({ w: e.target.naturalWidth, h: e.target.naturalHeight })}
             style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: imgWidth,
+              height: imgHeight,
+              transform: `translate(-50%, -50%) translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
               transformOrigin: 'center center',
               pointerEvents: 'none', userSelect: 'none',
             }}
