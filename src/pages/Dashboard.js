@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import PrintCardModal from '../components/PrintCardModal'
 
 const PLATFORMS = ['linkedin', 'github', 'instagram', 'telegram', 'website', 'other']
 
@@ -138,6 +139,7 @@ export default function Dashboard() {
   const [message, setMessage] = useState(null)
   const [linksMessage, setLinksMessage] = useState(null)
   const [stats, setStats] = useState({ totalViews: 0, weekViews: 0, saves: 0, calls: 0 })
+  const [printModalOpen, setPrintModalOpen] = useState(false)
 
   const fetchProfile = useCallback(async () => {
     const { data } = await supabase
@@ -617,13 +619,20 @@ export default function Dashboard() {
                   width: 'auto',
                   padding: '10px',
                 }}
-                onClick={() => window.print()}
+                onClick={() => setPrintModalOpen(true)}
               >
                 Print
               </button>
             </div>
           </div>
         )}
+
+        <PrintCardModal
+          isOpen={printModalOpen}
+          onClose={() => setPrintModalOpen(false)}
+          profile={profile}
+          publicUrl={publicUrl}
+        />
 
         {activeTab === 'qr' && !profile.slug && (
           <div style={S.card}>
