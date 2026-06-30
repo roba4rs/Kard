@@ -59,17 +59,17 @@ const IconArrowUpRight = () => (
 // ── Link tile styling: icon, bg, text color, label ─────────
 const PLATFORM_META = {
   linkedin:  { Icon: IconLinkedIn,  bg: '#16243d', color: '#3b9eff', label: 'LinkedIn' },
-  github:    { Icon: IconGitHub,    bg: '#1e1e1e', color: '#e5e5e5', label: 'GitHub' },
+  github:    { Icon: IconGitHub,    bg: '#192025', color: '#f8f8f8', label: 'GitHub' },
   instagram: { Icon: IconInstagram, bg: '#3a1530', color: '#f472b6', label: 'Instagram' },
   facebook:  { Icon: IconFacebook,  bg: '#13233f', color: '#3b82f6', label: 'Facebook' },
-  tiktok:    { Icon: IconTikTok,    bg: '#161616', color: '#ffffff', label: 'TikTok' },
-  threads:   { Icon: IconThreads,   bg: '#1e1e1e', color: '#e5e5e5', label: 'Threads' },
+  tiktok:    { Icon: IconTikTok,    bg: '#12181c', color: '#f8f8f8', label: 'TikTok' },
+  threads:   { Icon: IconThreads,   bg: '#192025', color: '#f8f8f8', label: 'Threads' },
   telegram:  { Icon: IconTelegram,  bg: '#11293a', color: '#38bdf8', label: 'Telegram' },
-  website:   { Icon: IconWebsite,   bg: '#15301f', color: '#22c55e', label: 'Website' },
-  other:     { Icon: IconLink,      bg: '#1e1e1e', color: '#e5e5e5', label: null },
+  website:   { Icon: IconWebsite,   bg: '#1a2e1c', color: '#68d36f', label: 'Website' },
+  other:     { Icon: IconLink,      bg: '#192025', color: '#f8f8f8', label: null },
 }
 
-const RESUME_META = { Icon: IconDoc, bg: '#15301f', color: '#22c55e', label: 'Resume' }
+const RESUME_META = { Icon: IconDoc, bg: '#1a2e1c', color: '#68d36f', label: 'Resume' }
 
 // Strip a URL down to a clean handle/domain for the card subtitle,
 // e.g. "https://github.com/rgidey/" -> "github.com/rgidey"
@@ -80,21 +80,23 @@ const displayUrl = (url) => {
 
 // ── Design tokens (matches Dashboard.js) ───────────────────
 const C = {
-  bg:          '#0a0a0a',
-  frameBg:     '#161616',
-  frameBorder: '#222222',
-  cardBg:      '#1c1c1c',
-  cardBorder:  '#262626',
-  inputBg:     '#1a1a1a',
-  inputBorder: '#2a2a2a',
-  divider:     '#2a2a2a',
-  textPrimary: '#ffffff',
-  textSecond:  '#999999',
-  textMuted:   '#666666',
-  accent:      '#22c55e',
-  accentSoft:  '#15301f',
-  accentHover: '#16a34a',
-  danger:      '#ef4444',
+  bg:          '#090e11',
+  frameBg:     '#12181c',
+  frameBorder: 'rgba(255,255,255,0.08)',
+  cardBg:      '#12181c',
+  cardBorder:  'rgba(255,255,255,0.08)',
+  inputBg:     '#192025',
+  surfaceElevated: '#192025',
+  inputBorder: 'rgba(255,255,255,0.1)',
+  divider:     'rgba(255,255,255,0.08)',
+  textPrimary: '#f8f8f8',
+  textSecond:  '#8e9aa4',
+  textMuted:   '#697178',
+  accent:      '#68d36f',
+  accentSoft:  '#192025',
+  accentHover: '#56c75e',
+  accentForeground: '#060d06',
+  danger:      '#f94144',
 }
 
 const S = {
@@ -136,7 +138,7 @@ const S = {
     gap: 8,
     padding: '12px',
     background: C.accent,
-    color: '#0a0a0a',
+    color: C.accentForeground,
     border: 'none',
     borderRadius: 10,
     fontSize: 14,
@@ -151,7 +153,7 @@ const S = {
     justifyContent: 'center',
     gap: 8,
     padding: '12px',
-    background: '#141414',
+    background: C.surfaceElevated,
     color: C.textPrimary,
     border: `1px solid ${C.inputBorder}`,
     borderRadius: 10,
@@ -185,7 +187,7 @@ const S = {
     width: 48,
     height: 48,
     flexShrink: 0,
-    background: '#141414',
+    background: C.surfaceElevated,
     color: C.textSecond,
     border: `1px solid ${C.inputBorder}`,
     borderRadius: 12,
@@ -202,28 +204,32 @@ const S = {
   },
   avatarWrap: {
     position: 'relative',
-    width: 92,
-    height: 92,
-    margin: '0 auto 18px',
+    width: 80,
+    height: 80,
+    flexShrink: 0,
+    borderRadius: 10,
+    overflow: 'hidden',
+    background: C.inputBg,
+    boxShadow: `0 0 28px 6px ${C.accent}55`,
   },
   avatarImg: {
-    position: 'relative',
-    zIndex: 1,
-    width: 92,
-    height: 92,
-    borderRadius: 14,
+    position: 'absolute',
+    top: '-3%',
+    left: '-3%',
+    width: '106%',
+    height: '106%',
     objectFit: 'cover',
     display: 'block',
   },
   avatarInitials: {
     position: 'relative',
     zIndex: 1,
-    width: 92,
-    height: 92,
-    borderRadius: 14,
+    width: 80,
+    height: 80,
+    borderRadius: 10,
     background: C.accentSoft,
     color: C.accent,
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 700,
     display: 'flex',
     alignItems: 'center',
@@ -233,9 +239,9 @@ const S = {
   locationRow: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     gap: 6,
-    margin: '0 0 18px',
+    margin: 0,
     fontSize: 13,
     color: C.textSecond,
   },
@@ -255,7 +261,7 @@ const S = {
     gap: 12,
     padding: '13px 14px',
     marginBottom: 10,
-    background: '#161616',
+    background: C.inputBg,
     border: `1px solid ${C.cardBorder}`,
     borderRadius: 16,
     textDecoration: 'none',
@@ -428,9 +434,8 @@ export default function PublicProfile() {
           <div style={S.card}>
 
             {/* Identity */}
-            <div style={{ textAlign: 'center', marginBottom: 4 }}>
-              <p style={S.eyebrow}>Public Profile</p>
-
+            <p style={S.eyebrow}>Public Profile</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 4 }}>
               <div style={S.avatarWrap}>
                 {profile.avatar_url ? (
                   <img src={profile.avatar_url} alt={profile.display_name} style={S.avatarImg} />
@@ -439,22 +444,24 @@ export default function PublicProfile() {
                 )}
               </div>
 
-              <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: C.textPrimary, letterSpacing: '-0.2px' }}>
-                {profile.display_name}
-              </h1>
-              {(profile.title || profile.company) && (
-                <p style={{ margin: '0 0 10px', fontSize: 14, color: C.textSecond }}>
-                  {profile.title}
-                  {profile.title && profile.company ? ' · ' : ''}
-                  {profile.company}
-                </p>
-              )}
-              {profile.location && (
-                <div style={S.locationRow}>
-                  <IconPin />
-                  <span>{profile.location}</span>
-                </div>
-              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h1 style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 700, color: C.textPrimary, letterSpacing: '-0.2px' }}>
+                  {profile.display_name}
+                </h1>
+                {(profile.title || profile.company) && (
+                  <p style={{ margin: '0 0 8px', fontSize: 14, color: C.textSecond }}>
+                    {profile.title}
+                    {profile.title && profile.company ? ' · ' : ''}
+                    {profile.company}
+                  </p>
+                )}
+                {profile.location && (
+                  <div style={S.locationRow}>
+                    <IconPin />
+                    <span>{profile.location}</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div style={S.divider} />
